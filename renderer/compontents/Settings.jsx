@@ -43,9 +43,6 @@ export default function Settings() {
     const oldMasterSchedule = store.get('masterSchedule');
     store.set('masterSchedule', [...oldMasterSchedule, newEvent]);
     setInputValue('');
-    store.openInEditor(
-    store.delete('unicorn')
-    )
   }
 
   return (

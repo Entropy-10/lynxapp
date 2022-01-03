@@ -1,43 +1,50 @@
 import NextAuth from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
 
 export default NextAuth({
   providers: [
-    DiscordProvider({
-      clientId: process.env.DISCORD_CLIENT_ID,
-      clientSecret: process.env.DISCORD_CLIENT_SECRET
-    }),
-
     {
-      id: "osu",
-      name: "Osu!",
-      type: "oauth",
+      id: 'osu',
+      name: 'Osu!',
+      type: 'oauth',
       clientId: process.env.OSU_CLIENT_ID,
       clientSecret: process.env.OSU_CLIENT_SECRET,
-      token: "https://osu.ppy.sh/oauth/token",
+      token: 'https://osu.ppy.sh/oauth/token',
       authorization: {
-        url: "https://osu.ppy.sh/oauth/authorize",
+        url: 'https://osu.ppy.sh/oauth/authorize',
         params: {
-          scope: "identify",
+          scope: 'identify',
         },
       },
-      userinfo: "https://osu.ppy.sh/api/v2/me",
+      userinfo: 'https://osu.ppy.sh/api/v2/me/osu',
       profile(profile) {
         const authorizedUsers = process.env.AUTH_USERS;
-        let authorized = 'unauthorized';
+        let authorized = false;
 
         if (authorizedUsers.includes(profile.id)) {
-          authorized = 'authorized';
+          authorized = true;
         }
 
         return {
           id: profile.id,
-          email: authorized,
+          email: null,
+          authorization: authorized,
           name: profile.username,
           image: profile.avatar_url,
+          rank: profile.statistics.global_rank,
+          discordTag: profile.discord
         }
       },
     }
   ],
+  callbacks: {
+    jwt: async ({ token, user }) => {
+      user && (token.user = user)
+      return token
+    },
+    session: async ({ session, token }) => {
+      session.user = token.user
+      return session
+    }
+  },
   secret: process.env.SECRET,
 })

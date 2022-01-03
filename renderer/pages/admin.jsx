@@ -15,7 +15,7 @@ import Settings from '../compontents/Settings';
 import { useSession, getProviders, signIn, signOut } from 'next-auth/react';
 
 function Admin() {
-  const { data: session } = useSession()
+  const { data: session } = useSession();
   const [providers, setproviders] = useState(null);
   const [selectedPage, setSelectedPage] = useState('home');
 
@@ -31,9 +31,9 @@ function Admin() {
     setSelectedPage(page)
   }
 
-  if (session && session.user.email === 'authorized') {
+  if (session && session.user.authorization) {
     return (
-      <div className="">
+      <div>
         <Head>
           <title>Lynx Admin Panel</title>
         </Head>
@@ -64,7 +64,7 @@ function Admin() {
       </div>
     )
   }
-  else if(session && session.user.email === 'unauthorized') return <Unauthorized />
+  else if(session && !session.user.authorization) return <Unauthorized />
   else return <Login signIn={signIn} providers={providers}/>
 }
 

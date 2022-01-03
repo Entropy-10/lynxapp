@@ -9,13 +9,17 @@ export default function Home() {
   const [masterSchedule, setMasterSchedule] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:4000/players')
-    .then(response => response.json()).catch((err) => console.log(err))
-    .then(data => setPlayersCount(data.length)).catch((err) => console.log(err));
+      fetch('https://esttournaments.com/api/players')
+        .then(response => response.json()).catch((err) => console.log(err))
+        .then(({ data }) => {
+          setPlayersCount(data.length);
+        }).catch((err) => console.log(err));
 
-    fetch('http://localhost:4000/freeplayers')
-    .then(response => response.json()).catch((err) => console.log(err))
-    .then(data => setFreeplayersCount(data.length)).catch((err) => console.log(err));
+      fetch('https://esttournaments.com/api/freeplayers')
+        .then(response => response.json()).catch((err) => console.log(err))
+        .then(({ data }) => {
+          setFreeplayersCount(data.length);
+        }).catch((err) => console.log(err));
   }, [])
   
   useEffect(() => {

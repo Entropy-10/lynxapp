@@ -1,7 +1,6 @@
 import { app } from 'electron';
 import serve from 'electron-serve';
 import { createWindow } from './helpers';
-import Store from 'electron-store';
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -12,6 +11,8 @@ if (isProd) {
 }
 
 (async () => {
+  const Store = require('electron-store');
+
   Store.initRenderer();
   await app.whenReady();
 
