@@ -39,14 +39,21 @@ export default function Settings() {
   }
 
   function handleAddButtonClick() {
+    console.log(inputValue, startDate);
+    console.log(store.get('masterSchedule'));
     const newEvent = { event: inputValue, date: startDate };
-    const oldMasterSchedule = store.get('masterSchedule');
-    store.set('masterSchedule', [...oldMasterSchedule, newEvent]);
-    setInputValue('');
+    if(!store.get('masterSchedule')){
+      store.set('masterSchedule', [newEvent]);
+      setInputValue('');
+    } else {
+      const oldMasterSchedule = store.get('masterSchedule');
+      store.set('masterSchedule', [...oldMasterSchedule, newEvent]);
+      setInputValue('');
+    }
   }
 
   return (
-    <div className="mt-10">
+    <div className="mt-10 h-1">
       <div>
         <span className="text-xl">Player Fetching</span>
         <div className="mt-7 text-md">
@@ -122,7 +129,6 @@ export default function Settings() {
           ))}
         </div>
       </div>
-
     </div>
   )
 }

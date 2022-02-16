@@ -63,7 +63,7 @@ export default function AllPlayers() {
       </div>
 
       {searchTerm.length < 1 ? players.map(player => (
-        <div key={player.osuId} className="flex mb-4">
+        <div key={player.osuId} className="flex mb-4 pl-2 py-2 bg-lynx-bg-light rounded-lg w-11/12">
           <img src={player.avatar} alt='player' className='rounded-md h-12 w-12' />
           
           <div className="inline-block">

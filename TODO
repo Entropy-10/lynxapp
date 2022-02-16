@@ -1,10 +1,11 @@
 LYNX ADMIN PANEL TODO
 
 Todo:
-  ☐ finish team display section 
-  ☐ make master schedule viewable in Home
+  ✔ finish team display section @done(22-02-11 16:04)
+  ✔ make master schedule viewable in Home @done(22-02-11 16:19)
   ☐ add the ablitily to edit and delete players and teams
   ☐ give the approved button functionality
+  ✔ fix scroll on settings page @done(22-02-12 08:51)
   ☐ add player data auto updating / give player fetching functionality
   ☐ add google sheets intergration
   ☐ bug huntin time

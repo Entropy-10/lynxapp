@@ -51,7 +51,7 @@ function Admin() {
             </div>
           </nav>
 
-          <div className="flex-1 bg-lynx-bg-dark">
+          <div className="flex-auto min-h-screen overflow-y-auto scrollbar-thin scrollbar-thumb-lynx-bg-mid-dark scrollbar-track-lynx-bg-light scrollbar-thumb-rounded-full scrollbar-track-rounded-full bg-lynx-bg-dark">
             {selectedPage === "home" && <Home />}
             {selectedPage === "allplayers" && <AllPlayers />}
             {selectedPage === "teams" && <Teams />}

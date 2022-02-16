@@ -1,8 +1,9 @@
 import SearchBar from './SearchBar';
 import { useState, useEffect} from  'react'
-import {IoCheckmarkSharp, IoCloseSharp} from 'react-icons/io5'
+import { IoChevronDownOutline } from 'react-icons/io5'
+import { BiEditAlt } from 'react-icons/bi'
 import Checkbox from './Checkbox';
-import { forEach } from 'lodash';
+import { Disclosure, Transition } from '@headlessui/react';
 
 export default function Teams() {
   const [teams, setTeams] = useState([]);
@@ -10,6 +11,9 @@ export default function Teams() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortedArrayAZ, setSortedArrayAZ] = useState([]);
   const [sortedArrayZA, setSortedArrayZA] = useState([]);
+  const [value, setValue] = useState("");
+  const [editMode, setEditMode] = useState(false);
+  const toggleEditMode = () => setEditMode(!editMode);
 
   useEffect(() => {
     fetch('https://esttournaments.com/api/teams')
@@ -21,7 +25,8 @@ export default function Teams() {
     setSearchTerm(searchTerm);
     if(searchTerm !== '') {
       const newTeamsList = teams.filter(team => {
-        return Object.values(team).join(' ').toLowerCase().includes(searchTerm.toLowerCase())
+        const teamSearchArray = Object.values(team).concat(Object.values(team.teamInfo))
+        return teamSearchArray.join(' ').toLowerCase().includes(searchTerm.toLowerCase())
       })
       setSearchResults(newTeamsList);
     }
@@ -55,7 +60,7 @@ export default function Teams() {
     teammates.forEach(teammate => {
       rankTotal += teammate.rank;
     })
-    return rankTotal / (teammates.length + 1);
+    return Math.round(rankTotal / (teammates.length + 1));
   }
 
   return (
@@ -63,51 +68,140 @@ export default function Teams() {
       <div className='mb-3'>
         <SearchBar searchTerm={searchTerm} searchHandler={searchHandler} sortAZ={sortAZ} sortZA={sortZA}/>
         <div className="font-bold mt-8">
-          <span className="mr-52 pr-2">Profile</span>
+          <span className="mr-52 pr-1">Teams</span>
           <span className="mr-10">Player Count</span>
-          <span className="mr-14">Approved?</span>
-          <span className="pl-1.5">UTC</span>
+          <span className="mr-10">Approved?</span>
+          <span className="">UTC</span>
         </div>
       </div>
 
       {searchTerm.length < 1 ? teams.map(team => (
-        <div key={team.osuId} className="flex mb-4">
-          <img src={team.avatar} alt='player' className='rounded-md h-12 w-12' />
-          
-          <div className="inline-block">
-            <div className="mx-2">{team.teamInfo.teamName}</div>
-            <div>
-              <span className="mx-2 text-sm">{team.discordTag}</span>
-              <span className="text-sm">{team.teammates ? `#${getAverageRank(team, team.teammates)}` : `#${team.rank}`}</span>
+        <div className='bg-lynx-bg-light rounded-lg w-3/4'>
+          <Disclosure>
+            <div key={team.osuId} className="p-2 mb-4 flex">
+              
+                  <img src={team.avatar} alt='player' className='rounded-md h-12 w-12' />
+                  
+                  <div className="inline-block">
+                    <div className="mx-2 flex items-center">
+                      {editMode ? 
+                        (<input type="text"
+                          className='w-20 bg-transparent border-b border-white border-dashed focus:outline-none' 
+                          value={value} 
+                          onChange={(e) => setValue(e.target.value)} 
+                          onBlur={toggleEditMode} />) 
+                      : (<span className='pr-2'>{value ? value : team.teamInfo.teamName}</span>)}
+                      <button onClick={toggleEditMode}><BiEditAlt className={`text-lynx-text-dark ${editMode ? 'hidden' : ''}`}/></button>
+                    </div>
+
+                    <div>
+                      <span className="mx-2 text-sm">{team.discordTag}</span>
+                      <span className="text-sm">{team.teammates ? `#${getAverageRank(team, team.teammates).toLocaleString()}` : `#${team.rank.toLocaleString()}`}</span>
+                    </div>
+                  </div>
+                  <div className="absolute flex items-center mt-3 ml-48">
+                    <span className="ml-20 mr-28 pl-3">{team.teammates.length + 1}</span>
+                    <span className="mr-14 px-2"><Checkbox approved={team.approved} /></span>
+                    <span className='mr-10'>{team.timezone}</span>
+                    <Disclosure.Button>
+                    {({ open }) => (
+                      <IoChevronDownOutline className={`transition ease-linear duration-100 ${open ? "transform rotate-180" : "transform rotate-0"}`} />
+                      )}
+                    </Disclosure.Button>
+                </div>
             </div>
-          </div>
-          <div className="absolute flex mt-3 ml-48">
-            <span className="ml-24 mr-24 px-1">{team.teammates.length + 1}</span>
-            <span className="mr-20 pr-2"><Checkbox approved={team.approved} /></span>
-            <span>{team.timezone}</span>
-          </div>
+
+            <Disclosure.Panel>
+              <div className="p-2 flex mb-4">
+                <img src={team.avatar} alt='player' className='rounded-md h-12 w-12' />
+                
+                <div className="inline-block">
+                  <div className="mx-2">{team.osuUsername}</div>
+                  <div>
+                    <span className="mx-2 text-sm">{team.discordTag}</span>
+                    <span className="text-sm">#{team.rank.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              {team.teammates.map(teammate => (
+                <div key={teammate.osuId} className="p-2 flex mb-4">
+                  <img src={teammate.avatar} alt='player' className='rounded-md h-12 w-12' />
+                  
+                  <div className="inline-block">
+                    <div className="mx-2">{teammate.osuUsername}</div>
+                    <div>
+                      <span className="mx-2 text-sm">{teammate.discordTag}</span>
+                      <span className="text-sm">#{teammate.rank.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </Disclosure.Panel>
+          </Disclosure>
         </div>
       ))
-    : searchResults.map(player => (
-      <div key={player.osuId} className="flex mb-4">
-          <img src={player.avatar} alt='player' className='rounded-md h-12 w-12' />
-          
-          <div className="inline-block">
-            <div className="mx-2">{player.osuUsername}</div>
-            <div>
-              <span className="mx-2 text-sm">{player.discordTag}</span>
-              <span className="text-sm">#{player.rank.toLocaleString()}</span>
+      : searchResults.map(team => (
+        <div className='bg-lynx-bg-light rounded-lg w-3/4'>
+          <Disclosure>
+            <div key={team.osuId} className="p-2 mb-4 flex">
+              
+                  <img src={team.avatar} alt='player' className='rounded-md h-12 w-12' />
+                  
+                  <div className="inline-block">
+                    <div className="mx-2 flex items-center">
+                      <span className='pr-2'>{team.teamInfo.teamName}</span>
+                      <button><BiEditAlt className='text-lynx-text-dark'/></button>
+                    </div>
+
+                    <div>
+                      <span className="mx-2 text-sm">{team.discordTag}</span>
+                      <span className="text-sm">{team.teammates ? `#${getAverageRank(team, team.teammates).toLocaleString()}` : `#${team.rank.toLocaleString()}`}</span>
+                    </div>
+                  </div>
+                  <div className="absolute flex items-center mt-3 ml-48">
+                    <span className="ml-20 mr-28 pl-3">{team.teammates.length + 1}</span>
+                    <span className="mr-14 px-2"><Checkbox approved={team.approved} /></span>
+                    <span className='mr-10'>{team.timezone}</span>
+                    <Disclosure.Button>
+                    {({ open }) => (
+                      <IoChevronDownOutline className={`transition ease-linear duration-100 ${open ? "transform rotate-180" : "transform rotate-0"}`} />
+                      )}
+                    </Disclosure.Button>
+                </div>
             </div>
-          </div>
-          <div className="absolute flex mt-3 ml-48">
-            <span className="ml-24 mr-24 px-1">{player.onTeam ? <IoCheckmarkSharp className='text-green-600' /> : <IoCloseSharp className='text-red-600' />}</span>
-            <span className="mr-24 pr-3">{player.inDiscord ? <IoCheckmarkSharp className='text-green-600' /> : <IoCloseSharp className='text-red-600' />}</span>
-            <span className="mr-20 pr-2"><Checkbox approved={player.approved} /></span>
-            <span>{player.timezone}</span>
-          </div>
+
+            <Disclosure.Panel>
+              <div className="p-2 flex mb-4">
+                <img src={team.avatar} alt='player' className='rounded-md h-12 w-12' />
+                
+                <div className="inline-block">
+                  <div className="mx-2">{team.osuUsername}</div>
+                  <div>
+                    <span className="mx-2 text-sm">{team.discordTag}</span>
+                    <span className="text-sm">#{team.rank.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              {team.teammates.map(teammate => (
+                <div key={teammate.osuId} className="p-2 flex mb-4">
+                  <img src={teammate.avatar} alt='player' className='rounded-md h-12 w-12' />
+                  
+                  <div className="inline-block">
+                    <div className="mx-2">{teammate.osuUsername}</div>
+                    <div>
+                      <span className="mx-2 text-sm">{teammate.discordTag}</span>
+                      <span className="text-sm">#{teammate.rank.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </Disclosure.Panel>
+          </Disclosure>
         </div>
       ))
-    }
+      }
     </div>
   )
 }
