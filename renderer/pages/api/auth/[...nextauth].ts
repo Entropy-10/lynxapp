@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth from 'next-auth'
 
 export default NextAuth({
   providers: [
@@ -12,16 +12,16 @@ export default NextAuth({
       authorization: {
         url: 'https://osu.ppy.sh/oauth/authorize',
         params: {
-          scope: 'identify',
-        },
+          scope: 'identify'
+        }
       },
       userinfo: 'https://osu.ppy.sh/api/v2/me/osu',
-      profile(profile) {
-        const authorizedUsers = process.env.AUTH_USERS;
-        let authorized = false;
+      profile (profile) {
+        const authorizedUsers = process.env.AUTH_USERS
+        let authorized = false
 
         if (authorizedUsers.includes(profile.id)) {
-          authorized = true;
+          authorized = true
         }
 
         return {
@@ -33,12 +33,12 @@ export default NextAuth({
           rank: profile.statistics.global_rank,
           discordTag: profile.discord
         }
-      },
+      }
     }
   ],
   callbacks: {
     jwt: async ({ token, user }) => {
-      user && (token.user = user)
+      (user != null) && (token.user = user)
       return token
     },
     session: async ({ session, token }) => {
@@ -46,5 +46,5 @@ export default NextAuth({
       return session
     }
   },
-  secret: process.env.SECRET,
+  secret: process.env.SECRET
 })
